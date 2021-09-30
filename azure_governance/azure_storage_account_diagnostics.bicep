@@ -1,5 +1,11 @@
 // Parameters
 //////////////////////////////////////////////////
+@description('The solution customer identifier.')
+param environment string
+
+@description('The SL Project Code.')
+param costCenter string
+
 @description('The name of the NSG Flow Logs Storage Account.')
 param nsgFlowLogsStorageAccountName string
 
@@ -10,9 +16,9 @@ param logAnalyticsWorkspaceId string
 //////////////////////////////////////////////////
 var location = resourceGroup().location
 var tags = {
-  environment: 'production'
+  environment: environment
   function: 'monitoring and diagnostics'
-  costCenter: 'it'
+  costCenter: costCenter
 }
 
 // Resource - Storage Account - Nsg Flow Logs

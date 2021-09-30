@@ -1,5 +1,11 @@
 // Parameters
 //////////////////////////////////////////////////
+@description('The solution customer identifier.')
+param environment string
+
+@description('The SL Project Code.')
+param costCenter string
+
 @description('The name of the Log Analytics Workspace')
 param logAnalyticsWorkspaceName string
 
@@ -15,9 +21,9 @@ var vmInsights = {
   galleryName: 'VMInsights'
 }
 var tags = {
-  environment: 'production'
+  environment: environment
   function: 'monitoring and diagnostics'
-  costCenter: 'it'
+  costCenter: costCenter
 }
 
 // Resource - Log Analytics Workspace

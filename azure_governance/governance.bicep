@@ -5,36 +5,46 @@ targetScope = 'subscription'
 // Parameters
 //////////////////////////////////////////////////
 @description('The solution customer identifier.')
-param customerId string
+param customerId string = 'jmw'
+
+@description('The SL Project Code.')
+param costCenter string = 'INTR-4741'
 
 @description('The deployment environment (e.g. prod, dev, test).')
 @allowed([
   'prod'
-  'staging'
-  'dev'
   'test'
 ])
-param environment string = 'dev'
+param environment string = 'prod'
 
 @description('The Azure region for deployment.')
-param azureRegion string
+param azureRegion string = 'eastus'
 
-@description('The Azure region short code for naming.')
-param azureRegionShortCode string
+@description('The Azure region short code for naming convention.')
+param azureRegionShortCode string = 'eus'
 
 // Global Variables
 //////////////////////////////////////////////////
 // Resource Groups
-var monitorResourceGroupName = 'rg-ade-${aliasRegion}-monitor'
+var monitorResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-monitor'
+var identityResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-identity'
 // Resources
-var logAnalyticsWorkspaceName = 'log-ade-${aliasRegion}-001'
-var nsgFlowLogsStorageAccountName = replace('saade${aliasRegion}nsgflow', '-', '')
+var logAnalyticsWorkspaceName = 'log-${customerId}o360-${environment}-${azureRegionShortCode}-001'
+var applicationGatewayManagedIdentityName = 'id-${customerId}o360-${environment}-${azureRegionShortCode}-applicationgateway'
+var nsgFlowLogsStorageAccountName = replace('${customerId}o360-${environment}-${azureRegionShortCode}nsgflow', '-', '')
 var activityLogDiagnosticSettingsName = 'subscriptionactivitylog'
 
 // Resource Group - Monitor
 //////////////////////////////////////////////////
 resource monitorResourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
   name: monitorResourceGroupName
+  location: azureRegion
+}
+
+// Resource Group - Identity
+//////////////////////////////////////////////////
+resource identityResourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
+  name: identityResourceGroupName
   location: azureRegion
 }
 
@@ -47,7 +57,24 @@ module logAnalyticsModule './azure_log_analytics.bicep' = {
     monitorResourceGroup
   ]
   params: {
+    environment: environment
+    costCenter: costCenter
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+  }
+}
+
+// module - indentity
+//////////////////////////////////////////////////
+module identityModule 'azure_identity.bicep' = {
+  scope: resourceGroup(identityResourceGroupName)
+  name: 'identityDeployment'
+  dependsOn: [
+    identityResourceGroup
+  ]
+  params: {
+    environment: environment
+    costCenter: costCenter
+    applicationGatewayManagedIdentityName: applicationGatewayManagedIdentityName
   }
 }
 
@@ -60,6 +87,8 @@ module storageAccountDiagnosticsModule './azure_storage_account_diagnostics.bice
     monitorResourceGroup
   ]
   params: {
+    environment: environment
+    costCenter: costCenter
     nsgFlowLogsStorageAccountName: nsgFlowLogsStorageAccountName
     logAnalyticsWorkspaceId: logAnalyticsModule.outputs.logAnalyticsWorkspaceId
   }
@@ -72,20 +101,6 @@ module activityLogModule './azure_activity_log.bicep' = {
   name: 'activityLogDeployment'
   params: {
     activityLogDiagnosticSettingsName: activityLogDiagnosticSettingsName
-    logAnalyticsWorkspaceId: logAnalyticsModule.outputs.logAnalyticsWorkspaceId
-  }
-}
-
-// Module - Policy
-//////////////////////////////////////////////////
-module policyModule './azure_policy.bicep' = {
-  scope: subscription()
-  name: 'policyDeployment'
-  params: {
-    azureRegion: azureRegion
-    listOfAllowedLocations: listOfAllowedLocations
-    listOfAllowedSKUs: listOfAllowedSKUs
-    initiativeDefinitionName: initiativeDefinitionName
     logAnalyticsWorkspaceId: logAnalyticsModule.outputs.logAnalyticsWorkspaceId
   }
 }
