@@ -25,3 +25,7 @@ resource applicationGatewayManagedIdentity 'Microsoft.ManagedIdentity/userAssign
   location: location
   tags: tags
 }
+
+// Outputs
+//////////////////////////////////////////////////
+output applicationGatewayManagedIdentityPrincipalID string = applicationGatewayManagedIdentity.properties.principalId

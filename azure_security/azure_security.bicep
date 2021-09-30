@@ -33,27 +33,28 @@ param adminPassword string
 // Global Variables
 //////////////////////////////////////////////////
 // Resource Groups
+var identityResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-identity'
 var keyVaultResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-keyvault'
 // Resources
+var applicationGatewayManagedIdentityName = 'id-${customerId}o360-${environment}-${azureRegionShortCode}-applicationgateway'
 var keyVaultName = 'kv-${customerId}o360-${environment}-${azureRegionShortCode}-001'
 
 // Existing Resources
 //////////////////////////////////////////////////
 // Variables
 var monitorResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-monitor'
-var identityResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-identity'
 var logAnalyticsWorkspaceName = 'log-${customerId}o360-${environment}-${azureRegionShortCode}-001'
-var applicationGatewayManagedIdentityName = 'id-${customerId}o360-${environment}-${azureRegionShortCode}-applicationgateway'
 // Resource - Log Analytics Workspace
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-10-01' existing = {
   scope: resourceGroup(monitorResourceGroupName)
   name: logAnalyticsWorkspaceName
 }
-// Resource - Managed Identity - Application Gateway
+
+// Resource Group - Identity
 //////////////////////////////////////////////////
-resource applicationGatewayManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
-  scope: resourceGroup(identityResourceGroupName)
-  name: applicationGatewayManagedIdentityName
+resource identityResourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
+  name: identityResourceGroupName
+  location: azureRegion
 }
 
 // Resource Group - Key Vault
@@ -61,6 +62,21 @@ resource applicationGatewayManagedIdentity 'Microsoft.ManagedIdentity/userAssign
 resource keyVaultResourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
   name: keyVaultResourceGroupName
   location: azureRegion
+}
+
+// Module - Indentity
+//////////////////////////////////////////////////
+module identityModule './azure_identity.bicep' = {
+  scope: resourceGroup(identityResourceGroupName)
+  name: 'identityDeployment'
+  dependsOn: [
+    identityResourceGroup
+  ]
+  params: {
+    environment: environment
+    costCenter: costCenter
+    applicationGatewayManagedIdentityName: applicationGatewayManagedIdentityName
+  }
 }
 
 // Module - Key Vault
@@ -77,7 +93,7 @@ module keyVaultModule './azure_key_vault.bicep' = {
     azureActiveDirectoryTenantID: azureActiveDirectoryTenantID
     adminPassword: adminPassword
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
-    applicationGatewayManagedIdentityPrincipalID: applicationGatewayManagedIdentity.properties.principalId
+    applicationGatewayManagedIdentityPrincipalID: identityModule.outputs.applicationGatewayManagedIdentityPrincipalID
     keyVaultName: keyVaultName
   }
 }
