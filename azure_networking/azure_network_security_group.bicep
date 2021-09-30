@@ -286,3 +286,29 @@ output webSubnetNSGId string = webSubnetNSG.id
 output dataSubnetNSGId string = dataSubnetNSG.id
 output addsSubnetNSGId string = addsSubnetNSG.id
 output wapSubnetNSGId string = wapSubnetNSG.id
+output nsgConfigurations array = [
+  {
+    name: 'applicationSubnet'
+    id: applicationSubnetNSG.id
+  }
+  {
+    name: 'rdsSubnet'
+    id: rdsSubnetNSG.id
+  }
+  {
+    name: 'webSubnet'
+    id: webSubnetNSG.id
+  }
+  {
+    name: 'dataSubnet'
+    id: dataSubnetNSG.id
+  }
+  {
+    name: 'addsSubnet'
+    id: addsSubnetNSG.id
+  }
+  {
+    name: 'wapSubnet'
+    id: wapSubnetNSG.id
+  }
+]

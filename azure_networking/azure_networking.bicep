@@ -36,23 +36,6 @@ param customerNetworkIpAddressPrefix string = '192.168.0.0/24'
 @secure()
 param connectionSharedKey string
 
-// Existing Resources
-//////////////////////////////////////////////////
-// Variables
-var monitorResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-monitor'
-var logAnalyticsWorkspaceName = 'log-${customerId}o360-${environment}-${azureRegionShortCode}-001'
-var nsgFlowLogsStorageAccountName = replace('${customerId}o360-${environment}-${azureRegionShortCode}nsgflow', '-', '')
-// Resource - Log Analytics Workspace
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-10-01' existing = {
-  scope: resourceGroup(monitorResourceGroupName)
-  name: logAnalyticsWorkspaceName
-}
-// Resource - Storage Account - Nsg Flow Logs
-resource nsgFlowLogsStorageAccount 'Microsoft.Storage/storageAccounts@2021-01-01' existing = {
-  scope: resourceGroup(monitorResourceGroupName)
-  name: nsgFlowLogsStorageAccountName
-}
-
 // Global Variables
 //////////////////////////////////////////////////
 // Resource Groups
@@ -91,6 +74,23 @@ var vpnGatewayPublicIpAddressName = 'pip-${customerId}o360-${environment}-${azur
 var localNetworkGatewayName = 'lgw-${customerId}o360-${environment}-${azureRegionShortCode}-vpng001'
 var vpnGatewayName = 'vpng-${customerId}o360-${environment}-${azureRegionShortCode}-vpng001'
 var connectionName = 'cn-${customerId}o360-${environment}-${azureRegionShortCode}-vpng001'
+
+// Existing Resources
+//////////////////////////////////////////////////
+// Variables
+var monitorResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-monitor'
+var logAnalyticsWorkspaceName = 'log-${customerId}o360-${environment}-${azureRegionShortCode}-001'
+var nsgFlowLogsStorageAccountName = replace('${customerId}o360-${environment}-${azureRegionShortCode}nsgflow', '-', '')
+// Resource - Log Analytics Workspace
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2020-10-01' existing = {
+  scope: resourceGroup(monitorResourceGroupName)
+  name: logAnalyticsWorkspaceName
+}
+// Resource - Storage Account - Nsg Flow Logs
+resource nsgFlowLogsStorageAccount 'Microsoft.Storage/storageAccounts@2021-01-01' existing = {
+  scope: resourceGroup(monitorResourceGroupName)
+  name: nsgFlowLogsStorageAccountName
+}
 
 // Resource Group - Networking
 //////////////////////////////////////////////////
@@ -198,38 +198,12 @@ module azureVpnGatewayModule './azure_vpn_gateway.bicep' = if (deployVpnGateway 
 
 // Module - Network Security Group Flow Logs
 //////////////////////////////////////////////////
-var nsgConfigurations = [
-  {
-    name: 'applicationSubnet'
-    id: networkSecurityGroupsModule.outputs.applicationSubnetNSGId
-  }
-  {
-    name: 'rdsSubnet'
-    id: networkSecurityGroupsModule.outputs.rdsSubnetNSGId
-  }
-  {
-    name: 'webSubnet'
-    id: networkSecurityGroupsModule.outputs.webSubnetNSGId
-  }
-  {
-    name: 'dataSubnet'
-    id: networkSecurityGroupsModule.outputs.dataSubnetNSGId
-  }
-  {
-    name: 'addsSubnet'
-    id: networkSecurityGroupsModule.outputs.addsSubnetNSGId
-  }
-  {
-    name: 'wapSubnet'
-    id: networkSecurityGroupsModule.outputs.wapSubnetNSGId
-  }
-]
 module nsgFlowLogsModule 'azure_network_security_group_flow_logs.bicep' = {
   scope: resourceGroup(networkWatcherResourceGroupName)
   name: 'nsgFlowLogsDeployment'
   params: {
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
     nsgFlowLogsStorageAccountId: nsgFlowLogsStorageAccount.id
-    nsgConfigurations: nsgConfigurations
+    nsgConfigurations: networkSecurityGroupsModule.outputs.nsgConfigurations
   }
 }

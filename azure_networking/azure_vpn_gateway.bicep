@@ -150,6 +150,7 @@ resource vpnGateway 'Microsoft.Network/virtualNetworkGateways@2020-08-01' = {
 // Resource - Vpn Gateway - Diagnostic Settings
 //////////////////////////////////////////////////
 resource vpnGatewayDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  scope: vpnGateway
   name: '${vpnGateway.name}-diagnostics'
   properties: {
     workspaceId: logAnalyticsWorkspaceId

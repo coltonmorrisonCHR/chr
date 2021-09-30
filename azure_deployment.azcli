@@ -1,5 +1,8 @@
 # Deploy Azure Governance
-az deployment sub create -l eastus -f 'C:\source\chr\azure_governance\governance.bicep'
+az deployment sub create -l eastus -f 'C:\source\chr\azure_governance\azure_governance.bicep'
+
+# Deploy Azure Security
+az deployment sub create -l eastus -f 'C:\source\chr\azure_security\azure_security.bicep'
 
 # Deploy Azure Networking
-az deployment sub create -l eastus -f 'C:\source\chr\azure_networking\networking.bicep'
+az deployment sub create -l eastus -f 'C:\source\chr\azure_networking\azure_networking.bicep'
