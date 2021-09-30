@@ -6,7 +6,9 @@ param environment string
 @description('The SL Project Code.')
 param costCenter string
 
+@description('The ID of the Log Analytics Workspace.')
 param logAnalyticsWorkspaceId string
+
 param virtualNetworkName string
 param virtualnetworkPrefix string
 param applicationSubnetName string
@@ -43,7 +45,7 @@ var tags = {
   costCenter: costCenter
 }
 
-// Resource - Virtual Network - Virtual Network 001
+// Resource - Virtual Network
 //////////////////////////////////////////////////
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-07-01' = {
   name: virtualNetworkName
@@ -132,7 +134,8 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-07-01' = {
   }
 }
 
-// resource - virtual network - diagnostic settings - virtual network 001
+// Resource - Virtual Network - Diagnostic Settings
+//////////////////////////////////////////////////
 resource virtualNetwork001Diagnostics 'microsoft.insights/diagnosticSettings@2021-05-01-preview' = {
   scope: virtualNetwork
   name: '${virtualNetwork.name}-diagnostics'
@@ -161,3 +164,7 @@ resource virtualNetwork001Diagnostics 'microsoft.insights/diagnosticSettings@202
     ]
   }
 }
+
+// Outputs
+//////////////////////////////////////////////////
+output azureBastionSubnetId string = virtualNetwork.properties.subnets[6].id

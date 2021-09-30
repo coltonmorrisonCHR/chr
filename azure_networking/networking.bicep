@@ -71,6 +71,8 @@ var applicationGatewaySubnetName = 'snet-${customerId}o360-${environment}-${azur
 var applicationGatewaySubnetPrefix = '10.100.2.232/29'
 var gatewaySubnetName = 'GatewaySubnet'
 var gatewaySubnetPrefix = '10.100.2.248/29'
+var azureBastionPublicIpAddressName = 'pip-${customerId}o360-${environment}-${azureRegionShortCode}-bastion001'
+var azureBastionName = 'bastion-${customerId}o360-${environment}-${azureRegionShortCode}-001'
 
 // Resource Group - Networking
 //////////////////////////////////////////////////
@@ -138,5 +140,23 @@ module virtualNetworkModule './azure_virtual_network.bicep' = {
     dataSubnetNSGId: networkSecurityGroupsModule.outputs.dataSubnetNSGId
     addsSubnetNSGId: networkSecurityGroupsModule.outputs.addsSubnetNSGId
     wapSubnetNSGId: networkSecurityGroupsModule.outputs.wapSubnetNSGId
+  }
+}
+
+// Module - Azure Bastion
+//////////////////////////////////////////////////
+// variables
+
+// module deployment
+module azureBastionModule './azure_bastion.bicep' = {
+  scope: resourceGroup(networkingResourceGroupName)
+  name: 'azureBastionDeployment'
+  params: {
+    environment: environment
+    costCenter: costCenter
+    logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    azureBastionPublicIpAddressName: azureBastionPublicIpAddressName
+    azureBastionName: azureBastionName
+    azureBastionSubnetId: virtualNetworkModule.outputs.azureBastionSubnetId
   }
 }
