@@ -4,6 +4,23 @@ targetScope = 'subscription'
 
 // Parameters
 //////////////////////////////////////////////////
+@description('The solution customer identifier.')
+param customerId string
+
+@description('The deployment environment (e.g. prod, dev, test).')
+@allowed([
+  'prod'
+  'staging'
+  'dev'
+  'test'
+])
+param environment string = 'dev'
+
+@description('The Azure region for deployment.')
+param azureRegion string
+
+@description('The Azure region short code for naming.')
+param azureRegionShortCode string
 
 // Global Variables
 //////////////////////////////////////////////////
@@ -11,6 +28,8 @@ targetScope = 'subscription'
 var monitorResourceGroupName = 'rg-ade-${aliasRegion}-monitor'
 // Resources
 var logAnalyticsWorkspaceName = 'log-ade-${aliasRegion}-001'
+var nsgFlowLogsStorageAccountName = replace('saade${aliasRegion}nsgflow', '-', '')
+var activityLogDiagnosticSettingsName = 'subscriptionactivitylog'
 
 // Resource Group - Monitor
 //////////////////////////////////////////////////
