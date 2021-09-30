@@ -168,3 +168,4 @@ resource virtualNetwork001Diagnostics 'microsoft.insights/diagnosticSettings@202
 // Outputs
 //////////////////////////////////////////////////
 output azureBastionSubnetId string = virtualNetwork.properties.subnets[6].id
+output gatewaySubnetId string = virtualNetwork.properties.subnets[8].id

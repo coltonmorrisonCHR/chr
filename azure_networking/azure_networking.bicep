@@ -23,6 +23,19 @@ param azureRegion string = 'eastus'
 @description('The Azure region short code for naming convention.')
 param azureRegionShortCode string = 'eus'
 
+@description('Deploy Azure VPN Gateway if value is set to true.')
+param deployVpnGateway bool = true
+
+@description('The Public IP Address of the customer router.')
+param customerNetworkRouterIpAddress string = '70.127.198.165'
+
+@description('The IP Address Prefiex of the customer network.')
+param customerNetworkIpAddressPrefix string = '192.168.0.0/24'
+
+@description('The VPN Connection Shared Key.')
+@secure()
+param connectionSharedKey string
+
 // Existing Resources
 //////////////////////////////////////////////////
 // Variables
@@ -44,6 +57,7 @@ resource nsgFlowLogsStorageAccount 'Microsoft.Storage/storageAccounts@2021-01-01
 //////////////////////////////////////////////////
 // Resource Groups
 var networkingResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-networking'
+var networkWatcherResourceGroupName = 'NetworkWatcherRG'
 // Resources
 var applicationSubnetNSGName = 'nsg-${customerId}o360-${environment}-${azureRegionShortCode}-app'
 var rdsSubnetNSGName = 'nsg-${customerId}o360-${environment}-${azureRegionShortCode}-rds'
@@ -73,6 +87,10 @@ var gatewaySubnetName = 'GatewaySubnet'
 var gatewaySubnetPrefix = '10.100.2.248/29'
 var azureBastionPublicIpAddressName = 'pip-${customerId}o360-${environment}-${azureRegionShortCode}-bastion001'
 var azureBastionName = 'bastion-${customerId}o360-${environment}-${azureRegionShortCode}-001'
+var vpnGatewayPublicIpAddressName = 'pip-${customerId}o360-${environment}-${azureRegionShortCode}-vpng001'
+var localNetworkGatewayName = 'lgw-${customerId}o360-${environment}-${azureRegionShortCode}-vpng001'
+var vpnGatewayName = 'vpng-${customerId}o360-${environment}-${azureRegionShortCode}-vpng001'
+var connectionName = 'cn-${customerId}o360-${environment}-${azureRegionShortCode}-vpng001'
 
 // Resource Group - Networking
 //////////////////////////////////////////////////
@@ -106,7 +124,7 @@ module networkSecurityGroupsModule './azure_network_security_group.bicep' = {
 //////////////////////////////////////////////////
 module virtualNetworkModule './azure_virtual_network.bicep' = {
   scope: resourceGroup(networkingResourceGroupName)
-  name: 'virtualNetwork001Deployment'
+  name: 'virtualNetworkDeployment'
   dependsOn: [
     networkingResourceGroup
   ]
@@ -145,9 +163,6 @@ module virtualNetworkModule './azure_virtual_network.bicep' = {
 
 // Module - Azure Bastion
 //////////////////////////////////////////////////
-// variables
-
-// module deployment
 module azureBastionModule './azure_bastion.bicep' = {
   scope: resourceGroup(networkingResourceGroupName)
   name: 'azureBastionDeployment'
@@ -158,5 +173,63 @@ module azureBastionModule './azure_bastion.bicep' = {
     azureBastionPublicIpAddressName: azureBastionPublicIpAddressName
     azureBastionName: azureBastionName
     azureBastionSubnetId: virtualNetworkModule.outputs.azureBastionSubnetId
+  }
+}
+
+// Module - Azure Vpn Gateway
+//////////////////////////////////////////////////
+module azureVpnGatewayModule './azure_vpn_gateway.bicep' = if (deployVpnGateway == true) {
+  scope: resourceGroup(networkingResourceGroupName)
+  name: 'vpnGatewayDeployment'
+  params: {
+    environment: environment
+    costCenter: costCenter
+    customerNetworkRouterIpAddress: customerNetworkRouterIpAddress
+    customerNetworkIpAddressPrefix: customerNetworkIpAddressPrefix
+    connectionSharedKey: connectionSharedKey
+    logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    vpnGatewayPublicIpAddressName: vpnGatewayPublicIpAddressName
+    localNetworkGatewayName: localNetworkGatewayName
+    vpnGatewayName: vpnGatewayName
+    connectionName: connectionName
+    gatewaySubnetId: virtualNetworkModule.outputs.gatewaySubnetId
+  }
+}
+
+// Module - Network Security Group Flow Logs
+//////////////////////////////////////////////////
+var nsgConfigurations = [
+  {
+    name: 'applicationSubnet'
+    id: networkSecurityGroupsModule.outputs.applicationSubnetNSGId
+  }
+  {
+    name: 'rdsSubnet'
+    id: networkSecurityGroupsModule.outputs.rdsSubnetNSGId
+  }
+  {
+    name: 'webSubnet'
+    id: networkSecurityGroupsModule.outputs.webSubnetNSGId
+  }
+  {
+    name: 'dataSubnet'
+    id: networkSecurityGroupsModule.outputs.dataSubnetNSGId
+  }
+  {
+    name: 'addsSubnet'
+    id: networkSecurityGroupsModule.outputs.addsSubnetNSGId
+  }
+  {
+    name: 'wapSubnet'
+    id: networkSecurityGroupsModule.outputs.wapSubnetNSGId
+  }
+]
+module nsgFlowLogsModule 'azure_network_security_group_flow_logs.bicep' = {
+  scope: resourceGroup(networkWatcherResourceGroupName)
+  name: 'nsgFlowLogsDeployment'
+  params: {
+    logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    nsgFlowLogsStorageAccountId: nsgFlowLogsStorageAccount.id
+    nsgConfigurations: nsgConfigurations
   }
 }

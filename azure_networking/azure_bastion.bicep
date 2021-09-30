@@ -9,8 +9,13 @@ param costCenter string
 @description('The ID of the Log Analytics Workspace.')
 param logAnalyticsWorkspaceId string
 
+@description('The name of the Azure Bastion Public IP Address.')
 param azureBastionPublicIpAddressName string
+
+@description('The name of the Azure Bastion.')
 param azureBastionName string
+
+@description('The resource ID of the Azure Bastion Subnet.')
 param azureBastionSubnetId string
 
 // Variables
