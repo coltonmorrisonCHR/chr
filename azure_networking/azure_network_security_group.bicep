@@ -6,6 +6,7 @@ param environment string
 @description('The SL Project Code.')
 param costCenter string
 
+@description('The ID of the Log Analytics Workspace.')
 param logAnalyticsWorkspaceId string
 param applicationSubnetNSGName string
 param rdsSubnetNSGName string
