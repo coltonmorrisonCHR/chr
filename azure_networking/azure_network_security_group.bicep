@@ -6,6 +6,7 @@ param environment string
 @description('The SL Project Code.')
 param costCenter string
 
+@description('The ID of the Log Analytics Workspace.')
 param logAnalyticsWorkspaceId string
 param applicationSubnetNSGName string
 param rdsSubnetNSGName string
@@ -112,16 +113,16 @@ resource webSubnetNSG 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
   properties: {
     securityRules: [
       {
-        name: 'HTTP_Inbound'
+        name: 'WinRM_Inbound'
         properties: {
-          description: 'Allow HTTP Inbound Over Port 9000'
+          description: 'Allow WinRM Inbound Over Port 5986'
           protocol: 'Tcp'
           sourcePortRange: '*'
-          destinationPortRange: '9000'
-          sourceAddressPrefix: '*'
+          destinationPortRange: '5986'
+          sourceAddressPrefix: '10.0.0.0/24'
           destinationAddressPrefix: '*'
           access: 'Allow'
-          priority: 100
+          priority: 310
           direction: 'Inbound'
         }
       }
