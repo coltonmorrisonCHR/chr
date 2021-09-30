@@ -28,10 +28,8 @@ param azureRegionShortCode string = 'cus'
 //////////////////////////////////////////////////
 // Resource Groups
 var monitorResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-monitor'
-var identityResourceGroupName = 'rg-${customerId}o360-${environment}-${azureRegionShortCode}-identity'
 // Resources
 var logAnalyticsWorkspaceName = 'log-${customerId}o360-${environment}-${azureRegionShortCode}-001'
-var applicationGatewayManagedIdentityName = 'id-${customerId}o360-${environment}-${azureRegionShortCode}-applicationgateway'
 var nsgFlowLogsStorageAccountName = replace('${customerId}o360-${environment}-${azureRegionShortCode}nsgflow', '-', '')
 var activityLogDiagnosticSettingsName = 'subscriptionactivitylog'
 
@@ -39,13 +37,6 @@ var activityLogDiagnosticSettingsName = 'subscriptionactivitylog'
 //////////////////////////////////////////////////
 resource monitorResourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
   name: monitorResourceGroupName
-  location: azureRegion
-}
-
-// Resource Group - Identity
-//////////////////////////////////////////////////
-resource identityResourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
-  name: identityResourceGroupName
   location: azureRegion
 }
 
@@ -61,21 +52,6 @@ module logAnalyticsModule './azure_log_analytics.bicep' = {
     environment: environment
     costCenter: costCenter
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
-  }
-}
-
-// module - indentity
-//////////////////////////////////////////////////
-module identityModule 'azure_identity.bicep' = {
-  scope: resourceGroup(identityResourceGroupName)
-  name: 'identityDeployment'
-  dependsOn: [
-    identityResourceGroup
-  ]
-  params: {
-    environment: environment
-    costCenter: costCenter
-    applicationGatewayManagedIdentityName: applicationGatewayManagedIdentityName
   }
 }
 
