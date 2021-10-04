@@ -8,11 +8,23 @@ param costCenter string
 
 @description('The ID of the Log Analytics Workspace.')
 param logAnalyticsWorkspaceId string
+
+@description('The NSG name for the App Subnet.')
 param applicationSubnetNSGName string
+
+@description('The NSG name for the RDS Subnet.')
 param rdsSubnetNSGName string
+
+@description('The NSG name for the Web Subnet.')
 param webSubnetNSGName string
+
+@description('The NSG name for the Data Subnet.')
 param dataSubnetNSGName string
+
+@description('The NSG name for the ADDS Subnet.')
 param addsSubnetNSGName string
+
+@description('The NSG name for the WAP Subnet.')
 param wapSubnetNSGName string
 
 // Variables
@@ -31,7 +43,22 @@ resource applicationSubnetNSG 'Microsoft.Network/networkSecurityGroups@2020-07-0
   location: location
   tags: tags
   properties: {
-    securityRules: []
+    securityRules: [
+      {
+        name: 'WinRM_Inbound'
+        properties: {
+          description: 'Allow WinRM Inbound Over Port 5986'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '5986'
+          sourceAddressPrefix: '10.0.0.0/24'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 310
+          direction: 'Inbound'
+        }
+      }
+    ]
   }
 }
 
@@ -71,7 +98,22 @@ resource rdsSubnetNSG 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
   location: location
   tags: tags
   properties: {
-    securityRules: []
+    securityRules: [
+      {
+        name: 'WinRM_Inbound'
+        properties: {
+          description: 'Allow WinRM Inbound Over Port 5986'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '5986'
+          sourceAddressPrefix: '10.0.0.0/24'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 310
+          direction: 'Inbound'
+        }
+      }
+    ]
   }
 }
 
@@ -166,7 +208,22 @@ resource dataSubnetNSG 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
   location: location
   tags: tags
   properties: {
-    securityRules: []
+    securityRules: [
+      {
+        name: 'WinRM_Inbound'
+        properties: {
+          description: 'Allow WinRM Inbound Over Port 5986'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '5986'
+          sourceAddressPrefix: '10.0.0.0/24'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 310
+          direction: 'Inbound'
+        }
+      }
+    ]
   }
 }
 
@@ -206,7 +263,22 @@ resource addsSubnetNSG 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
   location: location
   tags: tags
   properties: {
-    securityRules: []
+    securityRules: [
+      {
+        name: 'WinRM_Inbound'
+        properties: {
+          description: 'Allow WinRM Inbound Over Port 5986'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '5986'
+          sourceAddressPrefix: '10.0.0.0/24'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 310
+          direction: 'Inbound'
+        }
+      }
+    ]
   }
 }
 
@@ -246,7 +318,22 @@ resource wapSubnetNSG 'Microsoft.Network/networkSecurityGroups@2020-07-01' = {
   location: location
   tags: tags
   properties: {
-    securityRules: []
+    securityRules: [
+      {
+        name: 'WinRM_Inbound'
+        properties: {
+          description: 'Allow WinRM Inbound Over Port 5986'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '5986'
+          sourceAddressPrefix: '10.0.0.0/24'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 310
+          direction: 'Inbound'
+        }
+      }
+    ]
   }
 }
 
