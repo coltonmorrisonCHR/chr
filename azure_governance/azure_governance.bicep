@@ -5,7 +5,7 @@ targetScope = 'subscription'
 // Parameters
 //////////////////////////////////////////////////
 @description('The solution customer identifier.')
-param customerId string = 'jmw'
+param customerId string = 'gil'
 
 @description('The SL Project Code.')
 param costCenter string = 'INTR-4741'
@@ -14,14 +14,15 @@ param costCenter string = 'INTR-4741'
 @allowed([
   'prod'
   'test'
+  'stg'
 ])
 param environment string = 'prod'
 
 @description('The Azure region for deployment.')
-param azureRegion string = 'eastus'
+param azureRegion string = 'centralus'
 
 @description('The Azure region short code for naming convention.')
-param azureRegionShortCode string = 'eus'
+param azureRegionShortCode string = 'cus'
 
 // Global Variables
 //////////////////////////////////////////////////
