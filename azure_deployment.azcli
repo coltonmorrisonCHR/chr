@@ -1,3 +1,4 @@
+# Deploy Azure Environment
 # Deploy Azure Governance
 az deployment sub create -l eastus -f 'C:\source\chr\azure_governance\azure_governance.bicep'
 
@@ -6,3 +7,7 @@ az deployment sub create -l eastus -f 'C:\source\chr\azure_security\azure_securi
 
 # Deploy Azure Networking
 az deployment sub create -l eastus -f 'C:\source\chr\azure_networking\azure_networking.bicep'
+
+# Remove Azure Environment
+# Remove Azure Networking
+az group delete -n rg-jmwo360-prod-eus-networking
