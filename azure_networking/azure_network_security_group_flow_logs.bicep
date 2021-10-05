@@ -6,6 +6,7 @@ param logAnalyticsWorkspaceId string
 @description('The ID of the NSG Flow Logs Storage Account.')
 param nsgFlowLogsStorageAccountId string
 
+@description('The output from Azure NSG creation Bicep.')
 param nsgConfigurations array
 
 // Variables
