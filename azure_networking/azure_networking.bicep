@@ -5,32 +5,33 @@ targetScope = 'subscription'
 // Parameters
 //////////////////////////////////////////////////
 @description('The solution customer identifier.')
-param customerId string = 'jmw'
+param customerId string = 'gil'
 
 @description('The SL Project Code.')
 param costCenter string = 'INTR-4741'
 
 @description('The deployment environment (e.g. prod, dev, test).')
 @allowed([
-  'prod'
+  'dev'
   'test'
+  'prod'
 ])
 param environment string = 'prod'
 
 @description('The Azure region for deployment.')
-param azureRegion string = 'eastus'
+param azureRegion string = 'centralus'
 
 @description('The Azure region short code for naming convention.')
-param azureRegionShortCode string = 'eus'
+param azureRegionShortCode string = 'cus'
 
 @description('Deploy Azure VPN Gateway if value is set to true.')
 param deployVpnGateway bool = true
 
 @description('The Public IP Address of the customer router.')
-param customerNetworkRouterIpAddress string = '70.127.198.165'
+param customerNetworkRouterIpAddress string = ''
 
-@description('The IP Address Prefiex of the customer network.')
-param customerNetworkIpAddressPrefix string = '192.168.0.0/24'
+@description('The IP Address Prefiex of the customer network. e.g. 192.168.0.0/24')
+param customerNetworkIpAddressPrefix string = ''
 
 @description('The VPN Connection Shared Key.')
 @secure()
